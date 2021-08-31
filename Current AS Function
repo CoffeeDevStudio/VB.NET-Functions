@@ -1,0 +1,22 @@
+Dim test As String() = APP.CURR_AS_PARM().Split("|"c)
+
+
+Public Function CURR_AS_PARM() As String
+
+        Dim sqlParameters As String = ""
+        Dim ini_date As Date = "01/09/" & Date.Now.Year.ToString
+        Dim end_date As Date = "31/08/" & Date.Now.Year.ToString
+
+        If Date.Now.Month >= 9 Then
+
+            sqlParameters = ini_date.ToString & "|" & end_date.AddYears(1).ToString
+
+        Else
+
+            sqlParameters = ini_date.AddYears(-1).ToString & "|" & end_date.ToString
+
+        End If
+
+        Return sqlParameters
+
+End Function
