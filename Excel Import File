@@ -1,0 +1,88 @@
+Option Explicit On
+
+Imports System.Data.SqlClient
+Imports Excel = Microsoft.Office.Interop.Excel
+
+' CREATE EXCEL OBJECTS.
+Public Class Form3
+
+    Dim xlApp As Excel.Application
+    Dim xlWorkBook As Excel.Workbook
+    Dim xlWorkSheet As Excel.Worksheet
+    Dim DT As New DataTable()
+
+    Private Sub Form3_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+
+
+    End Sub
+
+    Private Sub cmdSelect_Click(sender As System.Object, e As System.EventArgs) Handles cmdSelect.Click
+        With OpenFileDialog1
+
+
+            .Title = "Excel File to Edit"           ' DIALOG BOX TITLE.
+            .FileName = ""
+            .Filter = "Excel File|*.xlsx;*.xls"     ' FILTER ONLY EXCEL FILES IN FILE TYPE.
+
+            Dim sFileName As String = ""
+
+            If .ShowDialog() = DialogResult.OK Then
+                sFileName = .FileName
+
+                If Trim(sFileName) <> "" Then
+                    readExcel(sFileName)            ' READ EXCEL DATA.
+                End If
+            End If
+        End With
+    End Sub
+
+    ' GET DATA FROM EXCEL AND POPULATE COMB0 BOX.
+    Private Sub readExcel(ByVal sFile As String)
+        xlApp = New Excel.Application
+        xlWorkBook = xlApp.Workbooks.Open(sFile)            ' WORKBOOK TO OPEN THE EXCEL FILE.
+        xlWorkSheet = xlWorkBook.Worksheets("Foglio1")       ' NAME OF THE WORK SHEET.
+
+        Dim str As String
+
+        Dim iRow As Integer
+        Dim icol As Integer = 1
+
+
+
+
+        Do While Not IsNothing(xlWorkSheet.Cells(1, icol).value)
+            DT.Columns.Add(xlWorkSheet.Cells(1, icol).value)
+            str = xlWorkSheet.Cells(1, icol).value
+            cmbEmp.Items.Add(str)
+
+            For iRow = 2 To xlWorkSheet.Rows.Count
+                If Trim(xlWorkSheet.Cells(iRow, icol).value) = "" Then
+                    Exit For        ' BAIL OUT IF REACHED THE LAST ROW.
+                Else
+                    ' POPULATE COMBO BOX.
+
+                    'str = xlWorkSheet.Columns.Column.ToString()
+                    If DT.Rows.Count <= iRow - 2 Then
+                        DT.Rows.Add()
+                        DT.Rows(iRow - 2).Item(str) = xlWorkSheet.Cells(iRow, icol).value
+
+                    Else
+                        DT.Rows(iRow - 2).Item(str) = xlWorkSheet.Cells(iRow, icol).value
+
+                    End If
+                End If
+            Next
+            icol = icol + 1
+        Loop
+        xlWorkSheet.Select()
+        xlWorkBook.Close() : xlApp.Quit()
+
+        ' CLEAN UP. (CLOSE INSTANCES OF EXCEL OBJECTS.)
+        System.Runtime.InteropServices.Marshal.ReleaseComObject(xlApp) : xlApp = Nothing
+        System.Runtime.InteropServices.Marshal.ReleaseComObject(xlWorkBook) : xlWorkBook = Nothing
+        System.Runtime.InteropServices.Marshal.ReleaseComObject(xlWorkSheet) : xlWorkSheet = Nothing
+    End Sub
+
+
+End Class
